@@ -27,7 +27,8 @@ ml BWA/0.7.17-GCC-10.3.0
 ml SAMtools/1.16.1-GCC-10.2.0
 ml BCFtools/1.15.1-GCC-10.2.0
 ml parallel/20210322-GCCcore-10.2.0
-
+ml numpy/1.17.1-intel-2019b-Python-3.7.4
+ml 
 # # setting directories
 Home=/scratch/drt83172/Wallace_lab/SNP_Finder/Data
 Scripts=/scratch/drt83172/Wallace_lab/SNP_Finder/Scripts
@@ -113,16 +114,17 @@ for cross in $(cat $Lists/All_Crosses.txt)
 do 
     echo "current cross is $cross"
     cat $PopInfo/usable_predicted_parents_double.csv | grep $cross | cut -d "," -f 1 > $Lists/${cross}_bams.txt
+    >$Lists/${cross}_bams2.txt
     for prog in $(cat $Lists/${cross}_bams.txt)
     do
-        echo "/${prog}/\/scratch\/drt83172\/Wallace_lab\/SNP_Finder\/Data/Inter\/${prog}_align_marked_sorted.bam/"
-        sed -i "/${prog}/\/scratch\/drt83172\/Wallace_lab\/SNP_Finder\/Data/Inter\/${prog}_align_marked_sorted.bam/" $Lists/${cross}_bams.txt
+        echo "$Inter/${prog}_align_marked_sorted.bam" >> $Lists/${cross}_bams2.txt
     done
     a=$(cat $Lists/${cross}_bams.txt | wc -l)
-    if [a >= 1]
+    echo "a is $a" 
+    if [ $a -ge 1 ];
     then
         echo "cross $cross has more than 1 progeny"
-        bcftools mpileup -f $RefGenome -b $Lists/${cross}_bams.txt | bcftools call -mv -Ob -o $Bcf_Files/variants.bcf
+        bcftools mpileup -f $RefGenome -b $Lists/${cross}_bams2.txt| bcftools call -mv -Ob -o $Bcf_Files/variants.bcf
     else 
         echo "cross $cross has less than 1 progeny"
     fi
